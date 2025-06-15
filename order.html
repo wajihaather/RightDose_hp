@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RightDose Medicine Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2a7fba;
+            --secondary: #3ab795;
+            --accent: #ff7e5f;
+            --light: #f5f7fa;
+            --dark: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: var(--secondary);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            color: var(--primary);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .output {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #eee;
+            min-height: 50px;
+            display: none; /* Hidden by default */
+        }
+        
+        .result-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .medicine-name {
+            font-weight: bold;
+            color: var(--dark);
+            font-size: 1.1em;
+        }
+        
+        .medicine-detail {
+            margin: 8px 0;
+            color: #555;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #d32f2f;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-pills"></i> Medicine Ordering Portal</h1>
+        <p>Search and order pharmaceutical products</p>
+    </header>
+
+    <div class="card">
+        <h2><i class="fas fa-search"></i> Medicine Lookup</h2>
+        <p>Enter the exact name of a medicine to view details</p>
+        
+        <input type="text" id="detailsInput" placeholder="E.g., Paracetamol, Amoxicillin">
+        <button onclick="getDetails()">
+            <i class="fas fa-search"></i> Search Medicine
+        </button>
+        <div class="output" id="detailsOutput"></div>
+    </div>
+
+    <div class="card">
+        <h2><i class="fas fa-shopping-cart"></i> Place Order</h2>
+        <p>Order medicines for your institution</p>
+        <input type="text" id="orderName" placeholder="Enter medicine name">
+        <select id="orderType">
+            <option value="">Select recipient type</option>
+            <option value="hospital">Hospital</option>
+            <option value="pharmacy">Pharmacy</option>
+            <option value="clinic">patient</option>
+        </select>
+        <button onclick="placeOrder()">
+            <i class="fas fa-paper-plane"></i> Submit Order
+        </button>
+        <div class="output" id="orderOutput"></div>
+    </div>
+
+    <script>
+        // Sample medicine database
+        const medicineDB = {
+            "Paracetamol": {
+                name: "Paracetamol",
+                type: "Analgesic/Antipyretic",
+                dosage: "500mg tablets",
+                manufacturer: "Multiple manufacturers",
+                description: "For treatment of mild to moderate pain and fever",
+                stock: 1245,
+                price: "$0.05 per tablet"
+            },
+            "Amoxicillin": {
+                name: "Amoxicillin",
+                type: "Antibiotic",
+                dosage: "250mg/500mg capsules",
+                manufacturer: "GSK, Pfizer, Novartis",
+                description: "Broad-spectrum penicillin antibiotic for bacterial infections",
+                stock: 876,
+                price: "$0.20 per capsule"
+            },
+            "Ibuprofen": {
+                name: "Ibuprofen",
+                type: "NSAID",
+                dosage: "200mg/400mg tablets",
+                manufacturer: "Advil, Nurofen",
+                description: "For pain, fever, and inflammation relief",
+                stock: 932,
+                price: "$0.08 per tablet"
+            },
+            "Omeprazole": {
+                name: "Omeprazole",
+                type: "Proton Pump Inhibitor",
+                dosage: "20mg capsules",
+                manufacturer: "AstraZeneca",
+                description: "For treatment of gastric acid-related disorders",
+                stock: 567,
+                price: "$0.15 per capsule"
+            }
+        };
+
+        // Get medicine details
+        async function getDetails() {
+            const output = document.getElementById("detailsOutput");
+            const input = document.getElementById("detailsInput");
+            const name = input.value.trim();
+            
+            // Clear previous results
+            output.innerHTML = "";
+            output.style.display = "none";
+            
+            if (!name) {
+                showError(output, "Please enter a medicine name");
+                return;
+            }
+            
+            // Show loading state
+            output.innerHTML = `<div style="text-align:center"><span class="loading"></span> Searching database...</div>`;
+            output.style.display = "block";
+            
+            // Simulate API delay
+            setTimeout(() => {
+                const medicine = medicineDB[name];
+                
+                if (!medicine) {
+                    showError(output, `"${name}" not found in our database. Try these: Paracetamol, Amoxicillin, Ibuprofen`);
+                    return;
+                }
+                
+                // Display medicine details
+                output.innerHTML = `
+                    <div class="result-item">
+                        <div class="medicine-name">${medicine.name}</div>
+                        <div class="medicine-detail"><strong>Type:</strong> ${medicine.type}</div>
+                        <div class="medicine-detail"><strong>Dosage:</strong> ${medicine.dosage}</div>
+                        <div class="medicine-detail"><strong>Manufacturer:</strong> ${medicine.manufacturer}</div>
+                        <div class="medicine-detail"><strong>Description:</strong> ${medicine.description}</div>
+                        <div class="medicine-detail"><strong>Stock:</strong> ${medicine.stock} units available</div>
+                        <div class="medicine-detail"><strong>Price:</strong> ${medicine.price}</div>
+                    </div>
+                `;
+            }, 800);
+        }
+
+        // Place order
+        async function placeOrder() {
+            const output = document.getElementById("orderOutput");
+            const name = document.getElementById("orderName").value.trim();
+            const type = document.getElementById("orderType").value;
+            
+            // Clear previous results
+            output.innerHTML = "";
+            output.style.display = "none";
+            
+            if (!name || !type) {
+                showError(output, "Please fill all fields");
+                return;
+            }
+            
+            // Show loading state
+            output.innerHTML = `<div style="text-align:center"><span class="loading"></span> Processing your order...</div>`;
+            output.style.display = "block";
+            
+            // Simulate API delay
+            setTimeout(() => {
+                const medicine = medicineDB[name];
+                
+                if (!medicine) {
+                    showError(output, `"${name}" is not available for ordering`);
+                    return;
+                }
+                
+                if (medicine.stock < 1) {
+                    showError(output, `"${name}" is currently out of stock`);
+                    return;
+                }
+                
+                // Generate order confirmation
+                const orderId = "ORD-" + Math.floor(Math.random() * 9000 + 1000);
+                const deliveryDate = new Date();
+                deliveryDate.setDate(deliveryDate.getDate() + 3);
+                
+                output.innerHTML = `
+                    <div class="result-item" style="background:#e8f5e9;border-radius:6px;">
+                        <div style="text-align:center;margin-bottom:15px;">
+                            <i class="fas fa-check-circle" style="font-size:40px;color:#4caf50;"></i>
+                            <h3 style="color:#4caf50;margin:10px 0;">Order Placed Successfully!</h3>
+                        </div>
+                        <div class="medicine-detail"><strong>Order ID:</strong> ${orderId}</div>
+                        <div class="medicine-detail"><strong>Medicine:</strong> ${medicine.name}</div>
+                        <div class="medicine-detail"><strong>Dosage:</strong> ${medicine.dosage}</div>
+                        <div class="medicine-detail"><strong>For:</strong> ${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+                        <div class="medicine-detail"><strong>Estimated Delivery:</strong> ${deliveryDate.toDateString()}</div>
+                        <div class="medicine-detail"><strong>Total Cost:</strong> ${medicine.price}</div>
+                    </div>
+                `;
+            }, 1200);
+        }
+
+        // Helper function to show errors
+        function showError(element, message) {
+            element.innerHTML = `<div class="error-message"><i class="fas fa-exclamation-circle"></i> ${message}</div>`;
+            element.style.display = "block";
+        }
+
+        // Allow form submission with Enter key
+        document.getElementById("detailsInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") getDetails();
+        });
+        
+        document.getElementById("orderName").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") placeOrder();
+        });
+    </script>
+</body>
+</html>

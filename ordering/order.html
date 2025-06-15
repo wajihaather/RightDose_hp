@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RightDose - Place Drug Order</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Reuse your existing header/footer if needed -->
+<link rel="stylesheet" href="../styles.css"> <!-- Shared styles -->
+<link rel="stylesheet" href="order.css"> <!-- Page-specific styles -->
+
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <h1>Place Drug Order</h1>
+        <div class="user-icon">
+            <i class="fas fa-user-circle"></i>
+        </div>
+    </nav>
+
+    <!-- Login/Signup Modal (shown if not logged in) -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-content">
+            <h2>Access Required</h2>
+            <p>Please login or sign up to place an order</p>
+            
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="signup">Sign Up</button>
+            </div>
+            
+            <div class="auth-form" id="loginForm">
+                <div class="input-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com">
+                </div>
+                <div class="input-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button class="auth-submit-btn">Login</button>
+                <p class="auth-footer">Forgot password? <a href="#">Reset here</a></p>
+            </div>
+            
+            <div class="auth-form" id="signupForm" style="display:none;">
+                <div class="input-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" placeholder="John Doe">
+                </div>
+                <div class="input-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com">
+                </div>
+                <div class="input-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••">
+                </div>
+                <div class="input-group">
+                    <label for="signupInstitution">Institution</label>
+                    <input type="text" id="signupInstitution" placeholder="Hospital/Clinic Name">
+                </div>
+                <button class="auth-submit-btn">Create Account</button>
+                <p class="auth-footer">By signing up, you agree to our <a href="#">Terms</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content (hidden until logged in) -->
+    <div class="container" id="orderContainer" style="display:none;">
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="drugSearch" placeholder="Search by Drug Name / Code..." autocomplete="off">
+                <button class="clear-search"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="search-suggestions" id="searchSuggestions"></div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-btn active">All</div>
+            <div class="filter-btn">Analgesics</div>
+            <div class="filter-btn">Antibiotics</div>
+            <div class="filter-btn">Antivirals</div>
+            <div class="filter-btn">More <i class="fas fa-chevron-down"></i></div>
+        </div>
+
+        <!-- Drug List -->
+        <div class="drug-list">
+            <!-- Sample Drug Card (will be populated dynamically) -->
+            <div class="drug-card">
+                <div class="drug-info">
+                    <h3>Paracetamol 500mg</h3>
+                    <p class="drug-code">D-12345</p>
+                    <p class="drug-manufacturer">ABC Pharmaceuticals</p>
+                    <p class="drug-stock">In stock: 1,250 units</p>
+                </div>
+                <div class="drug-actions">
+                    <div class="quantity-control">
+                        <button class="qty-btn minus"><i class="fas fa-minus"></i></button>
+                        <span class="qty-value">0</span>
+                        <button class="qty-btn plus"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <button class="add-btn">Add</button>
+                </div>
+            </div>
+            
+            <!-- More drug cards will appear here -->
+        </div>
+
+        <!-- Order Summary (fixed at bottom) -->
+        <div class="order-summary">
+            <div class="summary-header">
+                <span>Order Summary</span>
+                <span class="item-count">0 items</span>
+            </div>
+            <div class="summary-details">
+                <p>No items added yet</p>
+            </div>
+            <button class="checkout-btn" disabled>Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+<!-- At end of body -->
+<script src="../script.js"></script> <!-- Shared JS -->
+<script src="order.js"></script> <!-- Page-specific JS -->
+</body>
+</html>
